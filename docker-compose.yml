@@ -1,0 +1,15 @@
+services:
+  app:
+    image: bkimminich/juice-shop:latest
+    build: ./
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+  sonarqube:
+    image: sonarqube:25.9.0.112764-community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    restart: unless-stopped

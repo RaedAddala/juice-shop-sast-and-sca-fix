@@ -14,9 +14,9 @@ import * as challengeUtils from '../lib/challengeUtils'
 export function servePublicFiles () {
   return ({ params, query }: Request, res: Response, next: NextFunction) => {
     const file = params.file
-
-    if (!file.includes('/')) {
-      verify(file, res, next)
+    const sanitizedFile = path.basename(file)
+    if (sanitizedFile === file && !file.includes('..')) {
+      verify(sanitizedFile, res, next)
     } else {
       res.status(403)
       next(new Error('File names cannot contain forward slashes!'))

@@ -1,0 +1,6 @@
+projectKey=juice-shop-security
+serverUrl=http://localhost:9000
+serverVersion=25.9.0.112764
+dashboardUrl=http://localhost:9000/dashboard?id=juice-shop-security
+ceTaskId=5eb23b04-856b-45db-ad5c-13feb2a578f8
+ceTaskUrl=http://localhost:9000/api/ce/task?id=5eb23b04-856b-45db-ad5c-13feb2a578f8

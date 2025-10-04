@@ -1,241 +1,297 @@
-# ![Juice Shop Logo](https://raw.githubusercontent.com/juice-shop/juice-shop/master/frontend/src/assets/public/images/JuiceShop_Logo_100px.png) OWASP Juice Shop
+# Security Analysis for OWASP Juice Shop OWASP Juice Shop
 
-[![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-48A646.svg)](https://owasp.org/projects/#sec-flagships)
-[![GitHub release](https://img.shields.io/github/release/juice-shop/juice-shop.svg)](https://github.com/juice-shop/juice-shop/releases/latest)
-[![Twitter Follow](https://img.shields.io/twitter/follow/owasp_juiceshop.svg?style=social&label=Follow)](https://twitter.com/owasp_juiceshop)
-[![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/owasp_juiceshop?style=social)](https://reddit.com/r/owasp_juiceshop)
+This guide provides step-by-step instructions for performing Static Application Security Testing (SAST) and Software Composition Analysis (SCA) on the OWASP Juice Shop application using **SonarQube** and **Snyk**.
 
-![CI/CD Pipeline](https://github.com/juice-shop/juice-shop/workflows/CI/CD%20Pipeline/badge.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/juice-shop/juice-shop/badge.svg?branch=develop)](https://coveralls.io/github/juice-shop/juice-shop?branch=develop)[![Cypress tests](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/simple/3hrkhu/master&style=flat&logo=cypress)](https://dashboard.cypress.io/projects/3hrkhu/runs)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/223/badge)](https://www.bestpractices.dev/projects/223)
-![GitHub stars](https://img.shields.io/github/stars/juice-shop/juice-shop.svg?label=GitHub%20%E2%98%85&style=flat)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+## Project Overview
 
-> [The most trustworthy online shop out there.](https://twitter.com/dschadow/status/706781693504589824)
-> ([@dschadow](https://github.com/dschadow)) —
-> [The best juice shop on the whole internet!](https://twitter.com/shehackspurple/status/907335357775085568)
-> ([@shehackspurple](https://twitter.com/shehackspurple)) —
-> [Actually the most bug-free vulnerable application in existence!](https://youtu.be/TXAztSpYpvE?t=26m35s)
-> ([@vanderaj](https://twitter.com/vanderaj)) —
-> [First you 😂😂then you 😢](https://twitter.com/kramse/status/1073168529405472768)
-> ([@kramse](https://twitter.com/kramse)) —
-> [But this doesn't have anything to do with juice.](https://twitter.com/coderPatros/status/1199268774626488320)
-> ([@coderPatros' wife](https://twitter.com/coderPatros))
+This project demonstrates the implementation of **Static Application Security Testing (SAST)** and **Software Composition Analysis (SCA)** using OWASP Juice Shop as a vulnerable web application. The goal is to understand the "shift-left" security approach by identifying and fixing security vulnerabilities early in the development cycle.
 
-OWASP Juice Shop is probably the most modern and sophisticated insecure web application! It can be used in security
-trainings, awareness demos, CTFs and as a guinea pig for security tools! Juice Shop encompasses vulnerabilities from the
-entire
-[OWASP Top Ten](https://owasp.org/www-project-top-ten) along with many other security flaws found in real-world
-applications!
+### Learning Objectives
 
-![Juice Shop Screenshot Slideshow](screenshots/slideshow.gif)
+- Understand the "shift-left" approach to security
+- Apply Static Application Security Testing (SAST) tools to identify vulnerabilities
+- Use Software Composition Analysis (SCA) tools to detect flaws in dependencies
+- Learn to interpret scan reports and fix common vulnerabilities
 
-For a detailed introduction, full list of features and architecture overview please visit the official project page:
-<https://owasp-juice.shop>
+## Prerequisites
 
-## Table of contents
+- Node.js 20+
+- npm
+- Git
+- Docker and Docker Compose (for SonarQube)
 
-- [Setup](#setup)
-    - [From Sources](#from-sources)
-    - [Packaged Distributions](#packaged-distributions)
-    - [Docker Container](#docker-container)
-    - [Vagrant](#vagrant)
-- [Demo](#demo)
-- [Documentation](#documentation)
-    - [Node.js version compatibility](#nodejs-version-compatibility)
-    - [Troubleshooting](#troubleshooting)
-    - [Official companion guide](#official-companion-guide)
-- [Contributing](#contributing)
-- [References](#references)
-- [Merchandise](#merchandise)
-- [Donations](#donations)
-- [Contributors](#contributors)
-- [Licensing](#licensing)
+## Project Structure
 
-## Setup
+```text
+juice-shop-sast-and-sca-fix/
+├── routes/                     # Express.js route handlers
+├── models/                     # Database models (Sequelize)
+├── lib/                        # Utility libraries
+├── frontend/                   # Angular frontend application
+├── data/                       # Static data and configurations
+├── test/                       # Test suites (API and E2E)
+├── docker-compose.yml          # Docker configuration
+├── package.json                # Node.js dependencies
+├── sonar-project.properties    # SonarQube configuration
+└── READM.md # This file
+```
 
-> You can find some less common installation variations as well as instructions to run Juice Shop on a variety of cloud computing providers in
-> [the _Running OWASP Juice Shop_ documentation](https://pwning.owasp-juice.shop/companion-guide/latest/part1/running.html).
+## Setup and Installation
 
-### From Sources
+### 1. Clone and Setup
 
-![GitHub repo size](https://img.shields.io/github/repo-size/juice-shop/juice-shop.svg)
+```bash
+git clone https://github.com/RaedAddala/juice-shop-sast-and-sca-fix
+cd juice-shop-sast-and-sca-fix
+npm install
+```
 
-1. Install [node.js](#nodejs-version-compatibility)
-2. Run `git clone https://github.com/juice-shop/juice-shop.git --depth 1` (or
-   clone [your own fork](https://github.com/juice-shop/juice-shop/fork)
-   of the repository)
-3. Go into the cloned folder with `cd juice-shop`
-4. Run `npm install` (only has to be done before first start or when you change the source code)
-5. Run `npm start`
-6. Browse to <http://localhost:3000>
+### 2. Build Docker Image
 
-### Packaged Distributions
+```bash
+docker build -t juice-shop-security .
+```
 
-[![GitHub release](https://img.shields.io/github/downloads/juice-shop/juice-shop/total.svg)](https://github.com/juice-shop/juice-shop/releases/latest)
-[![SourceForge](https://img.shields.io/sourceforge/dm/juice-shop?label=sourceforge%20downloads)](https://sourceforge.net/projects/juice-shop/)
-[![SourceForge](https://img.shields.io/sourceforge/dt/juice-shop?label=sourceforge%20downloads)](https://sourceforge.net/projects/juice-shop/)
+### 3. Run the Application
 
-1. Install a 64bit [node.js](#nodejs-version-compatibility) on your Windows, MacOS or Linux machine
-2. Download `juice-shop-<version>_<node-version>_<os>_x64.zip` (or
-   `.tgz`) attached to
-   [latest release](https://github.com/juice-shop/juice-shop/releases/latest)
-3. Unpack and `cd` into the unpacked folder
-4. Run `npm start`
-5. Browse to <http://localhost:3000>
+```bash
+# Development mode
+npm run serve:dev
 
-> Each packaged distribution includes some binaries for `sqlite3` and
-> `libxmljs2` bound to the OS and node.js version which `npm install` was
-> executed on.
+# Production mode
+docker run -p 3000:3000 juice-shop-security
+```
 
-### Docker Container
+## SAST Analysis with SonarQube
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/bkimminich/juice-shop.svg)](https://hub.docker.com/r/bkimminich/juice-shop)
-![Docker Stars](https://img.shields.io/docker/stars/bkimminich/juice-shop.svg)
-[![](https://images.microbadger.com/badges/image/bkimminich/juice-shop.svg)](https://microbadger.com/images/bkimminich/juice-shop
-"Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/bkimminich/juice-shop.svg)](https://microbadger.com/images/bkimminich/juice-shop
-"Get your own version badge on microbadger.com")
+### 1. Start SonarQube via Docker Compose
 
-1. Install [Docker](https://www.docker.com)
-2. Run `docker pull bkimminich/juice-shop`
-3. Run `docker run --rm -p 127.0.0.1:3000:3000 bkimminich/juice-shop`
-4. Browse to <http://localhost:3000> (on macOS and Windows browse to
-   <http://192.168.99.100:3000> if you are using docker-machine instead of the native docker installation)
+In the root of your Juice Shop project (where the `docker-compose.yml` is), run:
 
-### Vagrant
+```bash
+docker-compose up -d sonarqube
+```
 
-1. Install [Vagrant](https://www.vagrantup.com/downloads.html) and
-   [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
-2. Run `git clone https://github.com/juice-shop/juice-shop.git` (or
-   clone [your own fork](https://github.com/juice-shop/juice-shop/fork)
-   of the repository)
-3. Run `cd vagrant && vagrant up`
-4. Browse to [192.168.56.110](http://192.168.56.110)
+Wait 1-2 minutes for it to fully start (check logs with `docker-compose logs sonarqube`). Access <http://localhost:9000>, log in with admin/admin, and change the password on first login.
 
-## Demo
+Generate a user token for authentication: Go to **My Account > Security**, create a token (e.g., name it "juice-scan"), and copy it.
 
-Feel free to have a look at the latest version of OWASP Juice Shop:
-<http://demo.owasp-juice.shop>
+### 2. Configure SonarQube
 
-> This is a deployment-test and sneak-peek instance only! You are __not
-> supposed__ to use this instance for your own hacking endeavours! No
-> guaranteed uptime! Guaranteed stern looks if you break it!
+The `sonar-project.properties` file is already configured in the project root. Update the `sonar.login` line with your generated token:
 
-## Documentation
+```properties
+sonar.login=<your_generated_token_here>
+```
 
-### Node.js version compatibility
+### 3. Run the SAST Scan
 
-![GitHub package.json dynamic](https://img.shields.io/github/package-json/cpu/juice-shop/juice-shop)
-![GitHub package.json dynamic](https://img.shields.io/github/package-json/os/juice-shop/juice-shop)
+Execute the scan using npx:
 
-OWASP Juice Shop officially supports the following versions of
-[node.js](http://nodejs.org) in line with the official
-[node.js LTS schedule](https://github.com/nodejs/LTS) as close as possible. Docker images and packaged distributions are
-offered accordingly.
+```bash
+npx sonarqube-scanner
+```
 
-| node.js | Supported              | Tested             | [Packaged Distributions](#packaged-distributions) | [Docker images](#docker-container) from `master` | [Docker images](#docker-container) from `develop` |
-|:--------|:-----------------------|:-------------------|:--------------------------------------------------|:-------------------------------------------------|:--------------------------------------------------|
-| 25.x    | :x:                    | :x:                |                                                   |                                                  |                                                   |
-| 24.x    | :heavy_check_mark:     | :heavy_check_mark: | Windows (`x64`), MacOS (`x64`), Linux (`x64`)     |                                                  |                                                   |
-| 23.x    | ( :heavy_check_mark: ) | :x:                |                                                   |                                                  |                                                   |
-| 22.x    | :heavy_check_mark:     | :heavy_check_mark: | Windows (`x64`), MacOS (`x64`), Linux (`x64`)     | `latest` (`linux/amd64`, `linux/arm64`)          | `snapshot` (`linux/amd64`, `linux/arm64`)         |
-| 21.x    | ( :heavy_check_mark: ) | :x:                |                                                   |                                                  |                                                   |
-| 20.x    | :heavy_check_mark:     | :heavy_check_mark: | Windows (`x64`), MacOS (`x64`), Linux (`x64`)     |                                                  |                                                   |
-| <20.x   | :x:                    | :x:                |                                                   |                                                  |                                                   |
+This will analyze the codebase (takes 5-10 minutes, depending on your machine). It uploads results to your local SonarQube instance.
 
-Juice Shop is automatically tested _only on the latest `.x` minor version_ of each node.js version mentioned above!
-There is no guarantee that older minor node.js releases will always work with Juice Shop!
-Please make sure you stay up to date with your chosen version.
+Once complete, refresh <http://localhost:9000>, go to **Projects**, and select "OWASP Juice Shop Security Analysis" to view the dashboard.
 
-### Troubleshooting
+## Identified SAST Vulnerabilities
 
-[![Gitter](http://img.shields.io/badge/gitter-join%20chat-1dce73.svg)](https://gitter.im/bkimminich/juice-shop)
+### 1. SQL Injection (Critical)
 
-If you need help with the application setup please check our
-[our existing _Troubleshooting_](https://pwning.owasp-juice.shop/companion-guide/latest/part4/troubleshooting.html)
-guide. If this does not solve your issue please post your specific problem or question in the
-[Gitter Chat](https://gitter.im/bkimminich/juice-shop) where community members can best try to help you.
+**Location**: `routes/login.ts:36`
+**Issue**: Direct string concatenation in SQL query
 
-:stop_sign: **Please avoid opening GitHub issues for support requests or questions!**
+```typescript
+// VULNERABLE CODE
+models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email || ''}' AND password = '${security.hash(req.body.password || '')}' AND deletedAt IS NULL`, { model: UserModel, plain: true })
+```
 
-### Official companion guide
+**Fix**: Use parameterized queries
 
-[![Write Goodreads Review](https://img.shields.io/badge/goodreads-write%20review-49557240.svg)](https://www.goodreads.com/review/edit/49557240)
+```typescript
+// FIXED CODE
+models.sequelize.query(`SELECT * FROM Users WHERE email = $mail AND password = $pass AND deletedAt IS NULL`,
+  { bind: { mail: req.body.email, pass: security.hash(req.body.password) }, model: UserModel, plain: true })
+```
 
-OWASP Juice Shop comes with an official companion guide eBook. It will give you a complete overview of all
-vulnerabilities found in the application including hints how to spot and exploit them. In the appendix you will even
-find complete step-by-step solutions to every challenge. Extensive documentation of
-[custom re-branding](https://pwning.owasp-juice.shop/companion-guide/latest/part4/customization.html),
-[CTF-support](https://pwning.owasp-juice.shop/companion-guide/latest/part4/ctf.html),
-[trainer's guide](https://pwning.owasp-juice.shop/companion-guide/latest/part4/trainers.html)
-and much more is also included.
+### 2. Cross-Site Scripting (XSS) (input Sanitization) (High)
 
-[Pwning OWASP Juice Shop](https://leanpub.com/juice-shop) is published under
-[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
-and is available **for free** in PDF, Kindle and ePub format on LeanPub. You can also
-[browse the full content online](https://pwning.owasp-juice.shop)!
+**Location**: `models/feedback.ts:41`
+**Issue**: Insufficient input sanitization
 
-[<img alt="Pwning OWASP Juice Shop cover" src="https://raw.githubusercontent.com/juice-shop/pwning-juice-shop/master/docs/modules/ROOT/assets/images/cover.jpg" width="200"/>](https://leanpub.com/juice-shop)
-[<img alt="Pwning OWASP Juice Shop back cover" src="https://raw.githubusercontent.com/juice-shop/pwning-juice-shop/master/docs/modules/ROOT/assets/images/introduction/back.jpg" width="200"/>](https://leanpub.com/juice-shop)
+```typescript
+// VULNERABLE CODE
+sanitizedComment = security.sanitizeHtml(comment)
+```
+
+**Fix**: Use secure sanitization
+
+```typescript
+// FIXED CODE
+sanitizedComment = security.sanitizeSecure(comment)
+```
+
+### 3. Path Traversal (Medium)
+
+**Location**: `routes/fileServer.ts:25`
+**Issue**: Inadequate path validation
+
+```typescript
+// VULNERABLE CODE
+if (!file.includes('/')) {
+  verify(file, res, next)
+}
+```
+
+**Fix**: Proper path sanitization
+
+```typescript
+// FIXED CODE
+const sanitizedFile = path.basename(file)
+if (sanitizedFile === file && !file.includes('..')) {
+  verify(sanitizedFile, res, next)
+}
+```
+
+### 4. Cross-Site Scripting (XSS) (Sanitizer Disabled) (High)
+
+**Locations**:
+    - `frontend/src/app/track-result/track-result.component.ts:45`
+    - `frontend/src/app/administration/administration.component.ts:57`
+    - `frontend/src/app/administration/administration.component.ts:75`
+    - `frontend/src/app/data-export/data-export.component.ts:55`
+    - `frontend/src/app/last-login-ip/last-login-ip.component.ts:38`
+    - `frontend/src/app/score-board/score-board.component.ts:86`
+    - `frontend/src/app/search-result/search-result.component.ts:135`
+    - `frontend/src/app/search-result/search-result.component.ts:161`
+    - `frontend/src/app/about/about.component.ts:121`
+**Issue**: Disabling Angular built-in sanitization
+
+```typescript
+// VULNERABLE CODE
+this.results.orderNo = this.sanitizer.bypassSecurityTrustHtml(`<code>${results.data[0].orderId}</code>`)
+```
+
+**Fix**: Use parameterized queries
+
+In the template:
+
+```typescript
+// FIXED CODE
+<code>{{ results.orderNo }}</code>
+```
+
+and in the typescript code:
+
+```typescript
+// FIXED CODE
+this.results.orderNo = results.data[0].orderId;
+```
+
+## SCA Analysis with Snyk
+
+### Setup Snyk
+
+```bash
+# Install Snyk CLI
+npm install -g snyk
+
+# Authenticate (requires Snyk account)
+snyk auth
+
+# Test for vulnerabilities
+snyk test
+```
+
+### Run SCA Scan
+
+```bash
+# Scan for vulnerabilities
+snyk test --json > snyk-report.json
+
+# Monitor project
+snyk monitor
+```
+
+## Identified SCA Vulnerabilities
+
+### 1. Prototype Pollution in lodash (High)
+
+**Package**: `lodash@4.17.20`
+**CVE**: CVE-2020-8203
+**Fix**: Update to `lodash@4.17.21`
+
+```bash
+npm update lodash
+```
+
+### 2. Regular Expression DoS in semver (Medium)
+
+**Package**: `semver@6.3.0`
+**CVE**: CVE-2022-25883
+**Fix**: Update to `semver@7.3.8`
+
+```bash
+npm install semver@^7.3.8
+```
+
+### 3. Cross-Site Scripting in sanitize-html (Medium)
+
+**Package**: `sanitize-html@1.27.5`
+**CVE**: CVE-2021-26539
+**Fix**: Update to `sanitize-html@2.7.3`
+
+```bash
+npm install sanitize-html@^2.7.3
+```
+
+## Testing and Validation
+
+### Verify SAST Fixes
+
+```bash
+# Re-run SonarQube scan
+sonarqube-scanner
+
+# Check that security hotspots are resolved
+# Access SonarQube dashboard at http://localhost:9000
+```
+
+### Verify SCA Fixes
+
+```bash
+# Re-run Snyk test
+snyk test
+
+# Should show fewer or no vulnerabilities
+npm audit
+```
+
+## Key Learnings
+
+1. **Shift-Left Security**: Early detection saves time and resources
+2. **Automated Scanning**: Essential for continuous security monitoring
+3. **Dependency Management**: Regular updates prevent security debt
+4. **False Positives**: Critical thinking required for scan results
+5. **Security Culture**: Tools are enablers, not replacements for secure coding
+
+## Resources
+
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [SonarQube Documentation](https://docs.sonarqube.org/)
+- [Snyk Documentation](https://docs.snyk.io/)
+- [OWASP Juice Shop](https://owasp-juice.shop/)
+- [Shift-Left Security](https://www.synopsys.com/glossary/what-is-shift-left-security.html)
 
 ## Contributing
 
-[![GitHub contributors](https://img.shields.io/github/contributors/juice-shop/juice-shop.svg)](https://github.com/juice-shop/juice-shop/graphs/contributors)
-[![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/owasp-juice-shop/localized.svg)](https://crowdin.com/project/owasp-juice-shop)
-![GitHub issues by-label](https://img.shields.io/github/issues/juice-shop/juice-shop/help%20wanted.svg)
-![GitHub issues by-label](https://img.shields.io/github/issues/juice-shop/juice-shop/good%20first%20issue.svg)
+1. Fork the repository
+2. Create a feature branch
+3. Run security scans
+4. Submit pull request with scan results
 
-We are always happy to get new contributors on board! Please check
-[CONTRIBUTING.md](CONTRIBUTING.md) to learn how to
-[contribute to our codebase](CONTRIBUTING.md#code-contributions) or the
-[translation into different languages](CONTRIBUTING.md#i18n-contributions)!
+## License
 
-## References
-
-Did you write a blog post, magazine article or do a podcast about or mentioning OWASP Juice Shop? Or maybe you held or
-joined a conference talk or meetup session, a hacking workshop or public training where this project was mentioned?
-
-Add it to our ever-growing list of [REFERENCES.md](REFERENCES.md) by forking and opening a Pull Request!
-
-## Merchandise
-
-* On [Spreadshirt.com](http://shop.spreadshirt.com/juiceshop) and
-  [Spreadshirt.de](http://shop.spreadshirt.de/juiceshop) you can get some swag (Shirts, Hoodies, Mugs) with the official
-  OWASP Juice Shop logo
-* On
-  [StickerYou.com](https://www.stickeryou.com/products/owasp-juice-shop/794)
-  you can get variants of the OWASP Juice Shop logo as single stickers to decorate your laptop with. They can also print
-  magnets, iron-ons, sticker sheets and temporary tattoos.
-
-## Donations
-
-[![](https://img.shields.io/badge/support-owasp%20juice%20shop-blue)](https://owasp.org/donate/?reponame=www-project-juice-shop&title=OWASP+Juice+Shop)
-
-The OWASP Foundation gratefully accepts donations via Stripe. Projects such as Juice Shop can then request reimbursement
-for expenses from the Foundation. If you'd like to express your support of the Juice Shop project, please make sure to
-tick the "Publicly list me as a supporter of OWASP Juice Shop" checkbox on the donation form. You can find our more
-about donations and how they are used here:
-
-<https://pwning.owasp-juice.shop/companion-guide/latest/part3/donations.html>
-
-## Contributors
-
-The OWASP Juice Shop Project Leaders are:
-
-- [Björn Kimminich](https://github.com/bkimminich) aka `bkimminich` [![Keybase PGP](https://img.shields.io/keybase/pgp/bkimminich)](https://keybase.io/bkimminich)
-- [Jannik Hollenbach](https://github.com/J12934) aka `J12934`
-
-For a list of all contributors to the OWASP Juice Shop please visit our
-[HALL_OF_FAME.md](HALL_OF_FAME.md).
-
-## Licensing
-
-[![license](https://img.shields.io/github/license/juice-shop/juice-shop.svg)](LICENSE)
-
-This program is free software: you can redistribute it and/or modify it under the terms of the [MIT license](LICENSE).
-OWASP Juice Shop and any contributions are Copyright © by Bjoern Kimminich & the OWASP Juice Shop contributors
-2014-2025.
-
-![Juice Shop Logo](https://raw.githubusercontent.com/juice-shop/juice-shop/master/frontend/src/assets/public/images/JuiceShop_Logo_400px.png)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
