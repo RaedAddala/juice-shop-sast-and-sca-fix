@@ -158,15 +158,17 @@ if (sanitizedFile === file && !file.includes('..')) {
 ### 4. Cross-Site Scripting (XSS) (Sanitizer Disabled) (High)
 
 **Locations**:
-    - `frontend/src/app/track-result/track-result.component.ts:45`
-    - `frontend/src/app/administration/administration.component.ts:57`
-    - `frontend/src/app/administration/administration.component.ts:75`
-    - `frontend/src/app/data-export/data-export.component.ts:55`
-    - `frontend/src/app/last-login-ip/last-login-ip.component.ts:38`
-    - `frontend/src/app/score-board/score-board.component.ts:86`
-    - `frontend/src/app/search-result/search-result.component.ts:135`
-    - `frontend/src/app/search-result/search-result.component.ts:161`
-    - `frontend/src/app/about/about.component.ts:121`
+
+  - `frontend/src/app/track-result/track-result.component.ts:45`
+  - `frontend/src/app/administration/administration.component.ts:57`
+  - `frontend/src/app/administration/administration.component.ts:75`
+  - `frontend/src/app/data-export/data-export.component.ts:55`
+  - `frontend/src/app/last-login-ip/last-login-ip.component.ts:38`
+  - `frontend/src/app/score-board/score-board.component.ts:86`
+  - `frontend/src/app/search-result/search-result.component.ts:135`
+  - `frontend/src/app/search-result/search-result.component.ts:161`
+  - `frontend/src/app/about/about.component.ts:121`
+  
 **Issue**: Disabling Angular built-in sanitization
 
 ```typescript
